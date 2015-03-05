@@ -16,6 +16,9 @@ Cameron Pittman, Udacity Course Developer
 cameron *at* udacity *dot* com
 */
 
+// Stores moving pizza elements
+var moving_pizzas = [];
+
 // As you may have realized, this website randomly generates pizzas.
 // Here are arrays of all possible pizza ingredients.
 var pizzaIngredients = {};
@@ -502,10 +505,16 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.querySelectorAll('.mover');
-  for (var i = 0; i < items.length; i++) {
+  for (var i = 0; i < moving_pizzas.length; i++) {
+
+    // Is item off of the screen?  Do nothing.
+    if (moving_pizzas[i].offsetTop > document.documentElement.clientHeight ||
+        moving_pizzas[i].offsetLeft > document.documentElement.clientWidth) {
+      continue;
+    }
+
     var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+    moving_pizzas[i].style.left = moving_pizzas[i].basicLeft + 100 * phase + 'px';
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -535,5 +544,9 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     document.querySelector("#movingPizzas1").appendChild(elem);
   }
+
+  // Store list of moving pizzas
+  moving_pizzas = document.querySelectorAll(".mover");
+
   updatePositions();
 });
