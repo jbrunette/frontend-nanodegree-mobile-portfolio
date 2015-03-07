@@ -452,11 +452,22 @@ var resizePizzas = function(size) {
   }
 
   // Iterates through pizza elements on the page and changes their widths
+  //   - Optimized to increase speed:
+  //     - Only execute document.querySelectorAll() once to collect pizza container elements
+  //     - Move new width calculations out of for loop as offsetWidth reference triggers a re-layout
+  //       - http://gent.ilcore.com/2011/03/how-not-to-trigger-layout-in-webkit.html
   function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+
+    // Get list of randomPizzaContainers
+    var random_pizza_containers = document.querySelectorAll(".randomPizzaContainer");
+
+    // Determine new width
+    var dx = determineDx(random_pizza_containers[0], size);
+    var newwidth = (random_pizza_containers[0].offsetWidth + dx) + 'px';
+
+    // Update pizza containers
+    for (var i = 0; i < random_pizza_containers.length; i++) {
+      random_pizza_containers[i].style.width = newwidth;
     }
   }
 
@@ -501,19 +512,18 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // Moves the sliding background pizzas based on scroll position
+//   - Optimized for speed:
+//     - Only grab scrollTop once, because scrollTop triggersa re-layout
+//       - http://gent.ilcore.com/2011/03/how-not-to-trigger-layout-in-webkit.html
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
+  // Get body's scrollTop
+  var scroll_top = document.body.scrollTop;
+
   for (var i = 0; i < moving_pizzas.length; i++) {
-
-    // Is item off of the screen?  Do nothing.
-    if (moving_pizzas[i].offsetTop > document.documentElement.clientHeight ||
-        moving_pizzas[i].offsetLeft > document.documentElement.clientWidth) {
-      continue;
-    }
-
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    var phase = Math.sin((scroll_top / 1250) + (i % 5));
     moving_pizzas[i].style.left = moving_pizzas[i].basicLeft + 100 * phase + 'px';
   }
 
