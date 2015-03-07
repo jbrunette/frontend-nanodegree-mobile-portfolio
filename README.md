@@ -1,7 +1,11 @@
-Portfolio
-==================
+Cam's Portfolio
+======================
 
-
+Instructions
+======================
+1. Using Git, clone the repository at https://github.com/jbrunette/frontend-nanodegree-mobile-portfolio to your computer.
+2. Open the "index.html" file in the root of the repository on your computer.
+3. Browse the different parts of the portfolio by clicking the links in the index page.
 
 
 Optimizations
