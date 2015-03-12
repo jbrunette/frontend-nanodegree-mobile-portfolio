@@ -18,3 +18,4 @@ Cam's Pizzeria
     - Move new width calculations out of for loop as calculation only needs to be performed once
   - Optimized updatePositions() for speed:
     - Only grab scrollTop once, because scrollTop triggersa re-layout
+- Only move pizzas when scrolling if the pizzas are visible

@@ -16,6 +16,9 @@ Cameron Pittman, Udacity Course Developer
 cameron *at* udacity *dot* com
 */
 
+// Stores random pizza elements
+var random_pizza_containers = [];
+
 // Stores moving pizza elements
 var moving_pizzas = [];
 
@@ -427,8 +430,7 @@ var resizePizzas = function(size) {
   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
   function determineDx (elem, size) {
     var oldwidth = elem.offsetWidth;
-    var windowwidth = document.querySelector("#randomPizzas").offsetWidth;
-    var oldsize = oldwidth / windowwidth;
+    var oldsize = oldwidth / random_pizzas_width;
 
     // TODO: change to 3 sizes? no more xl?
     // Changes the slider value to a percent width
@@ -446,20 +448,17 @@ var resizePizzas = function(size) {
     }
 
     var newsize = sizeSwitcher(size);
-    var dx = (newsize - oldsize) * windowwidth;
+    var dx = (newsize - oldsize) * random_pizzas_width;
 
     return dx;
   }
 
   // Iterates through pizza elements on the page and changes their widths
   //   - Optimized to increase speed:
-  //     - Only execute document.querySelectorAll() once to collect pizza container elements
+  //     - Do not get random pizza container's every time pizza size changes.  Only needs to be done once after pizzas are generated.
   //     - Move new width calculations out of for loop as offsetWidth reference triggers a re-layout
   //       - http://gent.ilcore.com/2011/03/how-not-to-trigger-layout-in-webkit.html
   function changePizzaSizes(size) {
-
-    // Get list of randomPizzaContainers
-    var random_pizza_containers = document.querySelectorAll(".randomPizzaContainer");
 
     // Determine new width
     var dx = determineDx(random_pizza_containers[0], size);
@@ -487,6 +486,9 @@ for (var i = 2; i < 100; i++) {
   var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
+
+// Store random pizzas
+random_pizza_containers = document.querySelectorAll(".randomPizzaContainer");
 
 // User Timing API again. These measurements tell you how long it took to generate the initial pizzas
 window.performance.mark("mark_end_generating");
@@ -540,6 +542,28 @@ function updatePositions() {
 // runs updatePositions on scroll
 window.addEventListener('scroll', updatePositions);
 
+// Update data when window size changes
+window.addEventListener('resize', handleResize);
+
+function handleResize() {
+  var new_moving_pizzas = [];
+
+  // Update list of moving pizzas to include only those that are visible
+  var moving_pizzas_temp = document.querySelectorAll(".mover");
+  for (var i=0; i<moving_pizzas_temp.length; i++) {
+    if (moving_pizzas_temp[i].offsetTop < document.documentElement.clientHeight) {
+      new_moving_pizzas.push(moving_pizzas_temp[i]);
+    }
+    else {
+      break;
+    }
+  }
+  moving_pizzas = new_moving_pizzas;
+
+  // Get new size of randomPizzas element
+  random_pizzas_width = document.getElementById("randomPizzas").offsetWidth;
+};
+
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
@@ -557,6 +581,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Store list of moving pizzas
   moving_pizzas = document.querySelectorAll(".mover");
+
+  // Update moving_pizzas to show only those visible
+  setTimeout(handleResize, 1);
 
   updatePositions();
 });
